@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: lost-found-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/folefound_db
+    username: folefounduser
+    password: folefoundpass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: "U3ByaW5nQm9vdDNEZW1vU2VjcmV0S2V5TWluaW11bTI1NkJpdHNMb25nU3RyaW5nMTIzNDU2Nzg5MA"
+  expiration: 1800000  # 30 minutes en millisecondes
