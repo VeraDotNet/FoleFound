@@ -4,7 +4,9 @@ import com.veradotnet.folefound.campus.application.dto.CampusDTO;
 import com.veradotnet.folefound.campus.application.mapper.CampusMapper;
 import com.veradotnet.folefound.campus.domain.model.Campus;
 import com.veradotnet.folefound.campus.domain.repository.CampusRepo;
-import com.veradotnet.folefound.shared.exception.RessourceNotFoundException;
+import com.veradotnet.folefound.location.domain.repository.LocationRepo;
+import com.veradotnet.folefound.shared.exception.ResourceInUseException;
+import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.Optional;
 public class CampusService {
 
     private final CampusRepo campusRepo;
+
+    private final LocationRepo locationRepo;
 
     public CampusDTO saveCampus(CampusDTO campusDTO) {
         //conversion du campusDto envoyé par postman en entité campus
@@ -37,16 +41,16 @@ public class CampusService {
                 .toList();
     }
 
-    public CampusDTO getCampus(Long id) throws RessourceNotFoundException {
+    public CampusDTO getCampus(Long id) throws ResourceNotFoundException {
         Optional<Campus> optionalCampus = campusRepo.findById(id);
         return optionalCampus
                 .map(campus -> CampusMapper.INSTANCE.toDTO(campus))
-                .orElseThrow(() -> new RessourceNotFoundException("Campus not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));
     }
 
-    public CampusDTO updateCampus(Long id, CampusDTO campusDTO) throws RessourceNotFoundException {
+    public CampusDTO updateCampus(Long id, CampusDTO campusDTO) throws ResourceNotFoundException {
         Campus campusToUpdate = campusRepo.findById(id)
-                .orElseThrow(() -> new RessourceNotFoundException("Campus not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));
 
         //modification du nom via le dto
         campusToUpdate.setName(campusDTO.getName());
@@ -58,12 +62,15 @@ public class CampusService {
         return CampusMapper.INSTANCE.toDTO(updatedCampus);
     }
 
-    public boolean deleteCampus(Long id) throws RessourceNotFoundException {
+    public boolean deleteCampus(Long id) throws ResourceNotFoundException {
         Campus campusToDelete = campusRepo.findById(id)
-                .orElseThrow(() -> new RessourceNotFoundException("Campus not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));
 
-        //Soft delete
-        campusToDelete.setIsActive(false);
+        boolean hasLocations = locationRepo.existsByCampusId(id);
+        if (hasLocations) {
+            throw new ResourceInUseException("Cannot delete this campus because it has locations associated with it. Please delete or reassign the locations first.");
+        }
+
         campusRepo.save(campusToDelete);
         return true;
     }

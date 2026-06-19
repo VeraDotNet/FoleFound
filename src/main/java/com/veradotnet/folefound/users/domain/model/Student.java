@@ -2,13 +2,16 @@ package com.veradotnet.folefound.users.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "student")
+@Table(name = "students", indexes = {
+        @Index(name = "idx_student_code", columnList = "studentCode")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

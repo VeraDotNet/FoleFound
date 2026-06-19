@@ -2,7 +2,7 @@ package com.veradotnet.folefound.campus.presentation;
 
 import com.veradotnet.folefound.campus.application.dto.CampusDTO;
 import com.veradotnet.folefound.campus.domain.service.CampusService;
-import com.veradotnet.folefound.shared.exception.RessourceNotFoundException;
+import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,17 +29,17 @@ public class CampusController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CampusDTO> getCampus(@PathVariable("id") Long id) throws RessourceNotFoundException {
+    public ResponseEntity<CampusDTO> getCampus(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return new ResponseEntity<>(campusService.getCampus(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CampusDTO> updateCampus(@PathVariable("id") Long id, @Valid @RequestBody CampusDTO campusDTO) throws RessourceNotFoundException {
+    public ResponseEntity<CampusDTO> updateCampus(@PathVariable("id") Long id, @Valid @RequestBody CampusDTO campusDTO) throws ResourceNotFoundException {
         return new ResponseEntity<>(campusService.updateCampus(id, campusDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteCampus(@PathVariable("id") Long id) throws RessourceNotFoundException {
+    public ResponseEntity<Boolean> deleteCampus(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return ResponseEntity.ok(campusService.deleteCampus(id));
     }
 }

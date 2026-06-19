@@ -3,10 +3,11 @@ package com.veradotnet.folefound.users.domain.service;
 import com.veradotnet.folefound.preRegistration.application.AcademicStatus;
 import com.veradotnet.folefound.preRegistration.domain.repository.PreRegistrationRepo;
 import com.veradotnet.folefound.users.application.dto.LoginRequest;
+import com.veradotnet.folefound.users.application.dto.StudentDTO;
 import com.veradotnet.folefound.users.application.dto.UserDTO;
 import com.veradotnet.folefound.users.application.enums.Role;
 import com.veradotnet.folefound.users.application.mapper.StudentMapper;
-import com.veradotnet.folefound.users.application.mapper.UserMapper;
+//import com.veradotnet.folefound.users.application.mapper.UserMapper;
 //import com.veradotnet.folefound.users.application.mapper.UserProfileMapper;
 import com.veradotnet.folefound.users.domain.model.Student;
 //import com.veradotnet.folefound.users.domain.model.UserProfile;
@@ -15,7 +16,6 @@ import com.veradotnet.folefound.users.domain.repository.StudentRepo;
 import com.veradotnet.folefound.users.domain.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,11 +39,11 @@ public class AuthService {
 
     private final BCryptPasswordEncoder encoder;
 
-    public UserDTO register(UserDTO userDTO) {
+    public UserDTO register(StudentDTO studentDTO) {
 
         // RM 0 :On vérifie si l'étudiant fait partie de la liste blanche de l'administration
         boolean isPreRegistered = preRegistrationRepo.existsByStudentCodeAndAcademicStatus(
-                userDTO.getStudentCode(),
+                studentDTO.getStudentCode(),
                 AcademicStatus.Active
         );
 
@@ -52,16 +52,16 @@ public class AuthService {
         }
 
         // RM 1 : Vérifier si le matricule est déjà pris
-        if (studentRepo.existsByStudentCode(userDTO.getStudentCode()))
+        if (studentRepo.existsByStudentCode(studentDTO.getStudentCode()))
             throw new IllegalArgumentException("This student ID already taken");
 
         // RM 2 : Vérifier si le username de connexion est déjà pris
-        if (userRepo.existsByUsername(userDTO.getUsername()))
+        if (userRepo.existsByUsername(studentDTO.getUsername()))
             throw new IllegalArgumentException("This username is already taken");
 
-        Student studentToSave = StudentMapper.INSTANCE.toModel(userDTO);
+        Student studentToSave = StudentMapper.INSTANCE.toModel(studentDTO);
 
-        studentToSave.setPassword(encoder.encode(userDTO.getPassword()));
+        studentToSave.setPassword(encoder.encode(studentDTO.getPassword()));
         studentToSave.setRole(Role.ROLE_STUDENT);
         studentToSave.setIsActive(true);
 

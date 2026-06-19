@@ -32,6 +32,7 @@ public class PreRegistrationService {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT
+                             .withDelimiter(';')
                              .withFirstRecordAsHeader() // Utilise la 1ère ligne comme en-têtes
                              .withIgnoreHeaderCase()    // Ignore la casse
                              .withTrim())) {            // Nettoie les espaces vides autour des textes

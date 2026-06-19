@@ -1,10 +1,8 @@
 package com.veradotnet.folefound.location.presentation;
 
 import com.veradotnet.folefound.location.application.dto.LocationDTO;
-import com.veradotnet.folefound.location.domain.model.Location;
-import com.veradotnet.folefound.location.domain.repository.LocationRepo;
 import com.veradotnet.folefound.location.domain.service.LocationService;
-import com.veradotnet.folefound.shared.exception.RessourceNotFoundException;
+import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,7 @@ public class LocationController {
     private final LocationService locationService;
 
     @PostMapping
-    public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationDTO locationDTO){
+    public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationDTO locationDTO) throws ResourceNotFoundException {
         return new ResponseEntity<>(locationService.saveLocation(locationDTO), HttpStatus.CREATED);
     }
 
@@ -31,17 +29,17 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LocationDTO> getLocation(@PathVariable("id") Long id) throws RessourceNotFoundException {
+    public ResponseEntity<LocationDTO> getLocation(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return new ResponseEntity<>(locationService.getLocation(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LocationDTO> updateLocation(@PathVariable("id") Long id, @Valid @RequestBody LocationDTO locationDTO) throws RessourceNotFoundException {
+    public ResponseEntity<LocationDTO> updateLocation(@PathVariable("id") Long id, @Valid @RequestBody LocationDTO locationDTO) throws ResourceNotFoundException {
         return new ResponseEntity<>(locationService.updateLocation(id, locationDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteLocation(@PathVariable("id") Long id) throws RessourceNotFoundException {
+    public ResponseEntity<Boolean> deleteLocation(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return new ResponseEntity<>(locationService.deleteLocation(id), HttpStatus.OK);
     }
 }

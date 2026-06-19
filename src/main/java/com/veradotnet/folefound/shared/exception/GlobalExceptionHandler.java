@@ -1,7 +1,9 @@
 package com.veradotnet.folefound.shared.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,71 +13,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    /**
-     * Gère les exceptions IllegalArgumentException
-     * (username exists, student code exists, incorrect credentials)
-     */
-   /* @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(
-            IllegalArgumentException ex,
-            WebRequest request) {
-        
-        logger.warn("Illegal argument: {}", ex.getMessage());
-        
-        ErrorResponse error = ErrorResponse.builder()
-                .status(HttpStatus.CONFLICT.value())
-                .message(ex.getMessage())
-                .path(request.getDescription(false).replace("uri=", ""))
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-    }*/
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
 
-    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
-    public ResponseEntity<ErrorResponse> handleResponseStatusException(
-            org.springframework.web.server.ResponseStatusException ex,
-            WebRequest request) {
-
-        ErrorResponse error = ErrorResponse.builder()
-                .status(ex.getStatusCode().value())
-                .message(ex.getReason())
-                .path(request.getDescription(false).replace("uri=", ""))
-                .timestamp(LocalDateTime.now())
-                .build();
-
-        return new ResponseEntity<>(error, ex.getStatusCode());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Gère les ressources non trouvées
-     */
-    @ExceptionHandler(RessourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(
-            RessourceNotFoundException ex,
-            WebRequest request) {
-        
-        logger.warn("Resource not found: {}", ex.getMessage());
-        
-        ErrorResponse error = ErrorResponse.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
-                .path(request.getDescription(false).replace("uri=", ""))
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    // erreurs de validation ou les IllegalArgumentException (400 Bad Request)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Gère les utilisateurs non trouvés
-     */
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFound(
             UsernameNotFoundException ex,
@@ -93,32 +61,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
-    /**
-     * Gère les erreurs de validation Bean
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex,
-            WebRequest request) {
-        
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("Validation failed");
-        
-        logger.debug("Validation error: {}", message);
-        
-        ErrorResponse error = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(message)
-                .path(request.getDescription(false).replace("uri=", ""))
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
+        String errorMessage = "Database integrity constraint violation.";
+
+        // Check if the error is related to the campus name uniqueness
+        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("campus")) {
+            errorMessage = "A campus with this name already exists.";
+        }
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value()) // 409
+                .message(errorMessage)
+                .path(request.getRequestURI()) // Récupère l'URL de la route qui a planté
                 .timestamp(LocalDateTime.now())
                 .build();
-        
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<ErrorResponse> handleResourceInUse(ResourceInUseException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value()) // 409 Conflict
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
 
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

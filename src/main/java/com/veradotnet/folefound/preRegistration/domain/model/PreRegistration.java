@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "preRegistration")
+@Table(name = "pre_registration", indexes = {
+        @Index(name = "idx_prereg_code_status", columnList = "studentCode, academicStatus")
+})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
