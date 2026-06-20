@@ -2,6 +2,7 @@ package com.veradotnet.folefound.location.domain.model;
 
 import com.veradotnet.folefound.campus.domain.model.Campus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,8 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Column(nullable = false, unique = true)
     private String name;
 
     private Boolean isActive = true;

@@ -74,7 +74,7 @@ public class CampusService {
             throw new ResourceInUseException("Cannot delete this campus because it has locations associated with it. Please delete or reassign the locations first.");
         }
 
-        campusRepo.save(campusToDelete);
+        campusRepo.delete(campusToDelete);
         return true;
     }
 }

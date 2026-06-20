@@ -5,6 +5,7 @@ import com.veradotnet.folefound.location.domain.service.LocationService;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +30,7 @@ public class LocationController {
 
     @GetMapping
     public ResponseEntity<Page<LocationDTO>> getLocations(
-            @PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
+           @ParameterObject @PageableDefault(page = 0, size = 3, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
         return new ResponseEntity<>(locationService.getLocations(pageable), HttpStatus.OK);
     }
 

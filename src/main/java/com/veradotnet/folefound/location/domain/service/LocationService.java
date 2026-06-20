@@ -92,7 +92,7 @@ public class LocationService {
         }*/
 
         //save in db
-        locationRepo.save(locationToDelete);
+        locationRepo.delete(locationToDelete);
         return true;
     }
 }

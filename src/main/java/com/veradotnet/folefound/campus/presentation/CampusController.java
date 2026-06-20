@@ -5,6 +5,7 @@ import com.veradotnet.folefound.campus.domain.service.CampusService;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +30,7 @@ public class CampusController {
 
     @GetMapping
     public ResponseEntity<Page<CampusDTO>> getCampuses(
-            @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
+           @ParameterObject @PageableDefault(page = 0, size = 2, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
         return new ResponseEntity<>(campusService.getCampuses(pageable), HttpStatus.OK);
     }
 
