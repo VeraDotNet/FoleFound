@@ -1,6 +1,7 @@
 package com.veradotnet.folefound.users.presentation;
 
 import com.veradotnet.folefound.users.application.dto.LoginRequest;
+import com.veradotnet.folefound.users.application.dto.StudentDTO;
 import com.veradotnet.folefound.users.application.dto.UserDTO;
 import com.veradotnet.folefound.users.domain.service.AuthService;
 import jakarta.validation.Valid;
@@ -19,8 +20,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@Valid @RequestBody UserDTO userDTO){
-        return new ResponseEntity<>(authService.register(userDTO), HttpStatus.CREATED);
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody StudentDTO studentDTO){
+        return new ResponseEntity<>(authService.register(studentDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")

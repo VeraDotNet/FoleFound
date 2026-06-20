@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PreRegistrationRepo extends JpaRepository<PreRegistration, Long> {
     // Vérifie si le matricule existe avec le statut ACTIF
-    boolean existsByStudentCodeAndAcademicStatus(String matricule, AcademicStatus status);
+    boolean existsByStudentCodeAndAcademicStatus(String studentCode, AcademicStatus status);
 }

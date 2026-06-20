@@ -8,11 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 public class UserDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
@@ -24,11 +25,8 @@ public class UserDTO {
     @NotBlank(message = "Password required")
     private String password;
 
-    @NotBlank(message = "Student ID required")
-    private String studentCode;
-
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Role role; // Type Enum
+    private Role role;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isActive;

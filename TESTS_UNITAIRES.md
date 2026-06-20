@@ -524,7 +524,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Should handle RessourceNotFoundException as 404 Not Found")
     void testHandleResourceNotFound() {
         // Arrange
-        RessourceNotFoundException ex = new RessourceNotFoundException("Campus not found");
+        ResourceNotFoundException ex = new ResourceNotFoundException("Campus not found");
         ServletWebRequest request = mock(ServletWebRequest.class);
         when(request.getDescription(false)).thenReturn("uri=/api/v1/campuses/999");
 

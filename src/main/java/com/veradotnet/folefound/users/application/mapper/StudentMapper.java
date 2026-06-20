@@ -1,5 +1,6 @@
 package com.veradotnet.folefound.users.application.mapper;
 
+import com.veradotnet.folefound.users.application.dto.StudentDTO;
 import com.veradotnet.folefound.users.application.dto.UserDTO;
 import com.veradotnet.folefound.users.domain.model.Student;
 import org.mapstruct.Mapper;
@@ -9,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 public interface StudentMapper {
     StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
 
-    Student toModel(UserDTO userDTO);
+    Student toModel(StudentDTO studentDTO);
 
-    UserDTO toDTO(Student student);
+    StudentDTO toDTO(Student student);
 }

@@ -455,36 +455,36 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex,
             WebRequest request) {
-        
+
         logger.warn("Illegal argument: {}", ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT.value())
                 .message(ex.getMessage())
                 .path(request.getDescription(false).replace("uri=", ""))
                 .timestamp(LocalDateTime.now())
                 .build();
-        
+
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
     /**
      * Gère les ressources non trouvées
      */
-    @ExceptionHandler(RessourceNotFoundException.class)
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
-            RessourceNotFoundException ex,
+            ResourceNotFoundException ex,
             WebRequest request) {
-        
+
         logger.warn("Resource not found: {}", ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
                 .path(request.getDescription(false).replace("uri=", ""))
                 .timestamp(LocalDateTime.now())
                 .build();
-        
+
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
@@ -495,16 +495,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUsernameNotFound(
             UsernameNotFoundException ex,
             WebRequest request) {
-        
+
         logger.debug("User not found: {}", ex.getMessage());
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .message("Invalid credentials")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .timestamp(LocalDateTime.now())
                 .build();
-        
+
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
@@ -515,23 +515,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex,
             WebRequest request) {
-        
+
         String message = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("Validation failed");
-        
+
         logger.debug("Validation error: {}", message);
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(message)
                 .path(request.getDescription(false).replace("uri=", ""))
                 .timestamp(LocalDateTime.now())
                 .build();
-        
+
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
@@ -542,16 +542,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGenericException(
             Exception ex,
             WebRequest request) {
-        
+
         logger.error("Unexpected error", ex);
-        
+
         ErrorResponse error = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .message("Internal server error")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .timestamp(LocalDateTime.now())
                 .build();
-        
+
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
