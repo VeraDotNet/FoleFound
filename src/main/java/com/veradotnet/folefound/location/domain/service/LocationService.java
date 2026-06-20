@@ -9,6 +9,8 @@ import com.veradotnet.folefound.location.domain.repository.LocationRepo;
 import com.veradotnet.folefound.shared.exception.ResourceInUseException;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,14 +43,13 @@ public class LocationService {
         return LocationMapper.INSTANCE.toDTO(persistedLocation);
     }
 
-    public List<LocationDTO> getLocations(){
+    public Page<LocationDTO> getLocations(Pageable pageable){
         //get all the list in DB
-        List<Location> locations = locationRepo.findAll();
+        Page<Location> locations = locationRepo.findAll(pageable);
 
         //conversion en dtos et display
-        return locations.stream()
-                .map(location -> LocationMapper.INSTANCE.toDTO(location))
-                .toList();
+        return locations
+                .map(location -> LocationMapper.INSTANCE.toDTO(location));
     }
 
     public LocationDTO getLocation(Long id) throws ResourceNotFoundException {

@@ -8,7 +8,10 @@ import com.veradotnet.folefound.location.domain.repository.LocationRepo;
 import com.veradotnet.folefound.shared.exception.ResourceInUseException;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,13 +35,13 @@ public class CampusService {
         return CampusMapper.INSTANCE.toDTO(persistedCampus);
     }
 
-    public List<CampusDTO> getCampuses(){
-        List<Campus> campuses = campusRepo.findAll();
+    @Transactional(readOnly = true)
+    public Page<CampusDTO> getCampuses(Pageable pageable){
+        Page<Campus> campuses = campusRepo.findAll(pageable);
 
         //Conversion de toute la liste d'entité en dtos
-        return campuses.stream()
-                .map(campus -> CampusMapper.INSTANCE.toDTO(campus))
-                .toList();
+        return campuses
+                .map(campus -> CampusMapper.INSTANCE.toDTO(campus));
     }
 
     public CampusDTO getCampus(Long id) throws ResourceNotFoundException {
