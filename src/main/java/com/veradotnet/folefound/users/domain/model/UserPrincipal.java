@@ -43,4 +43,8 @@ public class UserPrincipal implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    public Long getId() {
+        return this.user.getId(); // Permet d'accéder à l'ID de l'utilisateur connecté
+    }
 }

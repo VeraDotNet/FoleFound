@@ -22,10 +22,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
     private final UserRepo userRepo;
 
@@ -39,6 +41,7 @@ public class AuthService {
 
     private final BCryptPasswordEncoder encoder;
 
+    @Transactional
     public UserDTO register(StudentDTO studentDTO) {
 
         // RM 0 :On vérifie si l'étudiant fait partie de la liste blanche de l'administration

@@ -13,15 +13,18 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepo userRepo;
 
     private final BCryptPasswordEncoder encoder;
 
+    @Transactional
     public UserDTO createAccountByAdmin(UserDTO userDTO, Role chosenRole) {
         try {
             // Convertir le DTO en entité Users

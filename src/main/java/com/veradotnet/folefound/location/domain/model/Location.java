@@ -1,6 +1,7 @@
 package com.veradotnet.folefound.location.domain.model;
 
 import com.veradotnet.folefound.campus.domain.model.Campus;
+import com.veradotnet.folefound.declaration.domain.model.Declaration;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "location", indexes = {
@@ -42,4 +44,7 @@ public class Location {
     @ManyToOne
     @JoinColumn(name = "campus_id")
     private Campus campus;
+
+    @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
+    private List<Declaration> declarations;
 }

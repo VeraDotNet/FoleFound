@@ -19,6 +19,18 @@ spring:
       hibernate:
         format_sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: veraestelle463@gmail.com
+    password: lwau esfr ohhg vyxn
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret: "U3ByaW5nQm9vdDNEZW1vU2VjcmV0S2V5TWluaW11bTI1NkJpdHNMb25nU3RyaW5nMTIzNDU2Nzg5MA"
   expiration: 1800000  # 30 minutes en millisecondes

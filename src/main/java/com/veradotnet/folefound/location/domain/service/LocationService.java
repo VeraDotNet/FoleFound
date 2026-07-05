@@ -12,20 +12,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LocationService {
 
     private final LocationRepo locationRepo;
 
     private final CampusRepo campusRepo;
 
+    @Transactional
     public LocationDTO saveLocation(LocationDTO locationDTO) throws ResourceNotFoundException {
 
+        if (locationRepo.existsByNameIgnoreCase(locationDTO.getName())) {
+            throw new IllegalArgumentException("This location already exists.");
+        }
         Campus campus = campusRepo.findById(locationDTO.getCampusId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Campus not found" + locationDTO.getCampusId()));
@@ -59,6 +65,7 @@ public class LocationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
     }
 
+    @Transactional
     public LocationDTO updateLocation(Long id, LocationDTO locationDTO) throws ResourceNotFoundException {
         //find the location(model) to update
         Location locationToUpdate = locationRepo.findById(id)
@@ -81,6 +88,7 @@ public class LocationService {
         return LocationMapper.INSTANCE.toDTO(updatedLocation);
     }
 
+    @Transactional
     public Boolean deleteLocation(Long id) throws ResourceNotFoundException {
         //find  the location to delete
         Location locationToDelete = locationRepo.findById(id)

@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LocationRepo extends JpaRepository<Location, Long> {
     Boolean existsByCampusId(Long campusId);
+    boolean existsByNameIgnoreCase(String name);
 }

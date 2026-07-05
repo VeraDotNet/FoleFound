@@ -18,13 +18,18 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CampusService {
 
     private final CampusRepo campusRepo;
 
     private final LocationRepo locationRepo;
 
+    @Transactional
     public CampusDTO saveCampus(CampusDTO campusDTO) {
+        if (campusRepo.existsByNameIgnoreCase(campusDTO.getName())) {
+            throw new IllegalArgumentException("This campus already exists.");
+        }
         //conversion du campusDto envoyé par postman en entité campus
         Campus campusToSave = CampusMapper.INSTANCE.toModel(campusDTO);
 
@@ -35,7 +40,6 @@ public class CampusService {
         return CampusMapper.INSTANCE.toDTO(persistedCampus);
     }
 
-    @Transactional(readOnly = true)
     public Page<CampusDTO> getCampuses(Pageable pageable){
         Page<Campus> campuses = campusRepo.findAll(pageable);
 
@@ -51,6 +55,7 @@ public class CampusService {
                 .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));
     }
 
+    @Transactional
     public CampusDTO updateCampus(Long id, CampusDTO campusDTO) throws ResourceNotFoundException {
         Campus campusToUpdate = campusRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));
@@ -65,6 +70,7 @@ public class CampusService {
         return CampusMapper.INSTANCE.toDTO(updatedCampus);
     }
 
+    @Transactional
     public boolean deleteCampus(Long id) throws ResourceNotFoundException {
         Campus campusToDelete = campusRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Campus not found"));

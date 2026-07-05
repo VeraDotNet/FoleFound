@@ -1,5 +1,6 @@
 package com.veradotnet.folefound.category.domain.model;
 
+import com.veradotnet.folefound.item.domain.Model.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "category")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,15 +28,17 @@ public class Category {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 50)
     private String name;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime dateCreated;
 
     @LastModifiedDate
     private LocalDateTime lastModified;
 
-    @OneToMany(mappedBy = "object")
-    private List<Object> objects;
+    // mappedBy pointe bien vers l'attribut "category" dans la classe Item
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Item> items;
 }
