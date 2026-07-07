@@ -13,7 +13,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // Autorise toutes tes routes API
-                        .allowedOrigins("http://localhost:5174", "http://localhost:3000") // L'URL de ton projet React
+                        .allowedOrigins("http://localhost:5174","http://localhost:5173", "http://localhost:3000") // L'URL de ton projet React
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

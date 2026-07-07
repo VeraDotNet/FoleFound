@@ -30,7 +30,7 @@ public class LocationController {
 
     @GetMapping
     public ResponseEntity<Page<LocationDTO>> getLocations(
-           @ParameterObject @PageableDefault(page = 0, size = 3, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
+           @ParameterObject @PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
         return new ResponseEntity<>(locationService.getLocations(pageable), HttpStatus.OK);
     }
 

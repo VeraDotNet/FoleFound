@@ -30,7 +30,7 @@ public class CampusController {
 
     @GetMapping
     public ResponseEntity<Page<CampusDTO>> getCampuses(
-           @ParameterObject @PageableDefault(page = 0, size = 2, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
+           @ParameterObject @PageableDefault(page = 0, size = 5, sort = "name", direction = Sort.Direction.ASC)Pageable pageable){
         return new ResponseEntity<>(campusService.getCampuses(pageable), HttpStatus.OK);
     }
 
