@@ -37,6 +37,10 @@ public interface DeclarationMapper {
     @Mapping(target = "itemName", source = "item.name")   // Va chercher le nom caché dans l'Item lié
     @Mapping(target = "color", source = "item.color")     // Va chercher la couleur dans l'Item
     @Mapping(target = "brand", source = "item.brand")     // Va chercher la marque dans l'Item
+    @Mapping(target = "locationId", source = "location.id")
+    @Mapping(target = "locationName", source = "location.name")
+    @Mapping(target = "campusId", source = "location.campus.id") // Va chercher l'ID du campus via la relation Location
+    @Mapping(target = "campusName", source = "location.campus.name")
     DeclarationResponseDTO toResponseDTO(Declaration declaration);
 
    /* default List<String> mapImagesToUrls(List<Image> images) {

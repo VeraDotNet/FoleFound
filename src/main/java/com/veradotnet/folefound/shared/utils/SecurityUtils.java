@@ -1,13 +1,20 @@
 package com.veradotnet.folefound.shared.utils;
 
+import com.veradotnet.folefound.declaration.domain.repository.DeclarationRepo;
 import com.veradotnet.folefound.users.domain.model.UserPrincipal;
+import jakarta.persistence.Column;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+@Component("securityUtils")
+@RequiredArgsConstructor
 public class SecurityUtils {
-    /**
-     * Extrait l'ID de l'utilisateur actuellement connecté au système
-     */
+
+    private final DeclarationRepo declarationRepo;
+
+    //Extrait l'ID de l'utilisateur actuellement connecté au système
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -23,5 +30,14 @@ public class SecurityUtils {
         }
 
         throw new IllegalArgumentException("Le type de Principal d'authentification n'est pas supporté.");
+    }
+
+    public boolean isDeclarationOwner(Long declarationId) {
+        Long currentUserId = getCurrentUserId();
+
+        // On cherche la déclaration en base de données
+        return declarationRepo.findById(declarationId)
+                .map(declaration -> declaration.getUser().getId().equals(currentUserId))
+                .orElse(false); // Si la déclaration n'existe pas, on refuse l'accès (false)
     }
 }

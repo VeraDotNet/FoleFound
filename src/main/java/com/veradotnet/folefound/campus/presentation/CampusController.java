@@ -12,12 +12,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/campuses")
+@RequestMapping("api/v1/campus")
 @RequiredArgsConstructor
 public class CampusController {
 
@@ -47,5 +48,14 @@ public class CampusController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deleteCampus(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return ResponseEntity.ok(campusService.deleteCampus(id));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Page<CampusDTO>> searchCampuses(
+            @RequestParam String name,
+            @ParameterObject @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        Page<CampusDTO> results = campusService.searchCampusesByName(name, pageable);
+        return ResponseEntity.ok(results);
     }
 }

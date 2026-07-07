@@ -2,6 +2,7 @@ package com.veradotnet.folefound.location.domain.service;
 
 import com.veradotnet.folefound.campus.domain.model.Campus;
 import com.veradotnet.folefound.campus.domain.repository.CampusRepo;
+import com.veradotnet.folefound.declaration.domain.repository.DeclarationRepo;
 import com.veradotnet.folefound.location.application.dto.LocationDTO;
 import com.veradotnet.folefound.location.application.mapper.LocationMapper;
 import com.veradotnet.folefound.location.domain.model.Location;
@@ -25,6 +26,8 @@ public class LocationService {
     private final LocationRepo locationRepo;
 
     private final CampusRepo campusRepo;
+
+    private final DeclarationRepo declarationRepo;
 
     @Transactional
     public LocationDTO saveLocation(LocationDTO locationDTO) throws ResourceNotFoundException {
@@ -94,13 +97,18 @@ public class LocationService {
         Location locationToDelete = locationRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
 
-        /*boolean hasDeclarations = declarationRepo.existsByLocationId(id);
-        if (declarationRepo.existsByLocationId(locationId)) {
+        boolean hasDeclarations = declarationRepo.existsByLocationId(id);
+        if (hasDeclarations) {
             throw new ResourceInUseException("Cannot delete this location because it is linked to object declarations.");
-        }*/
+        }
 
         //save in db
         locationRepo.delete(locationToDelete);
         return true;
+    }
+
+    public Page<LocationDTO> searchLocationsByName(String name, Pageable pageable) {
+        Page<Location> locations = locationRepo.findByNameContainingIgnoreCase(name, pageable);
+        return locations.map(LocationMapper.INSTANCE::toDTO);
     }
 }

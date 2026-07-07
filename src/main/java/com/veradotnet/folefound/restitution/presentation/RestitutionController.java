@@ -38,11 +38,11 @@ public class RestitutionController {
 
     @GetMapping
     public ResponseEntity<Page<RestitutionDTO>> getRestitutions(
-            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "dateCreated", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(restitutionService.getRestitutions(pageable));
     }
 
-    @PatchMapping("/{id}/note")
+    @PatchMapping("/note/{id}")
     public ResponseEntity<RestitutionDTO> updateNote(
             @PathVariable Long id,
             @RequestBody String newNote) throws ResourceNotFoundException {

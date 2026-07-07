@@ -9,7 +9,6 @@ import com.veradotnet.folefound.restitution.application.dto.RestitutionDTO;
 import com.veradotnet.folefound.restitution.application.mapper.RestitutionMapper;
 import com.veradotnet.folefound.restitution.domain.model.Restitution;
 import com.veradotnet.folefound.restitution.domain.repository.RestitutionRepo;
-import com.veradotnet.folefound.shared.exception.ResourceInUseException;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import com.veradotnet.folefound.users.domain.model.Users;
 import com.veradotnet.folefound.users.domain.repository.UserRepo;
@@ -33,11 +32,10 @@ public class RestitutionService {
         Matching matching = matchingRepo.findById(matchingId)
                 .orElseThrow(() -> new RuntimeException("Matching not found"));
 
-        MatchingStatus currentStatus = matching.getStatus();
-        if (currentStatus != MatchingStatus.AUTOMATIC_VALIDATED || currentStatus != MatchingStatus.MANUAL_VALIDATED) {
-            throw new IllegalStateException("Cannot restitute an object which invalidated matching (Statut actuel : " + currentStatus + ")");
+        if (matching.getStatus() == MatchingStatus.PENDING_AGENT_REVIEW){
+            throw new IllegalStateException("This matching is not yet approved. It needs agent review");
         }
-        else if(matching.getStatus() == MatchingStatus.RESOLVED) {
+        if (matching.getStatus() == MatchingStatus.RESOLVED) {
             throw new IllegalStateException("This matching is already completed.");
         }
 
@@ -53,6 +51,7 @@ public class RestitutionService {
         //mise à jour du statut de l'item
         if (matching.getFoundDeclaration().getItem() != null) {
             matching.getFoundDeclaration().getItem().setItemState(ItemState.RESTITUTED);
+            matching.getLostDeclaration().getItem().setItemState(ItemState.RESTITUTED);
         }
 
         matchingRepo.save(matching);

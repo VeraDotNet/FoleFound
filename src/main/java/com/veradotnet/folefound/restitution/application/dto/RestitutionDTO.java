@@ -28,4 +28,8 @@ public class RestitutionDTO {
     private Long matchingId;
     private Long agentId;
     private String agentName;
+
+    private Long foundDeclarationId;
+    private String itemName;
+    private String categoryName;
 }

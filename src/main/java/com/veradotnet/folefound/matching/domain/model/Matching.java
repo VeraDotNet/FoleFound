@@ -36,8 +36,8 @@ public class Matching {
     @CreatedDate
     private LocalDateTime dateCreated;
 
-    //@LastModifiedDate
-    //private LocalDateTime lastModified;
+    @LastModifiedDate
+    private LocalDateTime lastModified;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

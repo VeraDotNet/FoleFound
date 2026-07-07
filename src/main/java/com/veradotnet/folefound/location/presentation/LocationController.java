@@ -12,12 +12,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/locations")
+@RequestMapping("api/v1/location")
 @RequiredArgsConstructor
 public class LocationController {
 
@@ -47,5 +48,14 @@ public class LocationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deleteLocation(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return new ResponseEntity<>(locationService.deleteLocation(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Page<LocationDTO>> searchLocations(
+            @RequestParam String name,
+            @ParameterObject @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        Page<LocationDTO> results = locationService.searchLocationsByName(name, pageable);
+        return ResponseEntity.ok(results);
     }
 }

@@ -46,4 +46,12 @@ public class CategoryController {
     public ResponseEntity<Boolean> deleteCategory(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return ResponseEntity.ok(categoryService.deleteCategory(id));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<CategoryDTO>> searchCategories(
+            @RequestParam String name,
+            @ParameterObject @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        Page<CategoryDTO> results = categoryService.searchCategoriesByName(name, pageable);
+        return ResponseEntity.ok(results);
+    }
 }

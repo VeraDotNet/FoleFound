@@ -5,6 +5,7 @@ import com.veradotnet.folefound.users.domain.service.MyUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,10 +40,51 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/error")
                         .permitAll()
-                        .requestMatchers("/api/v1/campuses/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/api/v1/locations/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/api/v1/admin/users/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/api/v1/preRegistration").hasAnyRole("ADMIN")
+
+                        // Lecture (GET) access to everyone
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/campus/**").hasAnyRole("ADMIN", "AGENT", "STUDENT", "PERSONNEL")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/location/**").hasAnyRole("ADMIN", "AGENT", "STUDENT", "PERSONNEL")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/category/**").hasAnyRole("ADMIN", "AGENT", "STUDENT", "PERSONNEL")
+
+                        //Ecriture réservée a ladmin/agent
+                        .requestMatchers(
+                                "/api/v1/campus/**").hasAnyRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/location/**").hasAnyRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/category/**").hasAnyRole("ADMIN", "AGENT")
+
+                        //Administration only
+                        .requestMatchers(
+                                "/api/v1/admin/user/**").hasAnyRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/preRegistration/**").hasAnyRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/declaration/search").hasAnyRole("ADMIN", "AGENT")
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/declaration/my-declarations").hasAnyRole("STUDENT", "PERSONNEL")
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/v1/declaration/archive/{id}").hasAnyRole("AGENT", "STUDENT", "PERSONNEL")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/declaration/{id}").hasAnyRole("AGENT", "STUDENT", "PERSONNEL")
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/v1/declaration/{id}").hasAnyRole("AGENT", "STUDENT", "PERSONNEL")
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/declaration").hasAnyRole("STUDENT","PERSONNEL")
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/v1/declaration").hasAnyRole("AGENT")
+
+                        .requestMatchers(
+                                "/api/v1/stats/**").hasAnyRole("ADMIN","AGENT")
+                        .requestMatchers(
+                                "/api/v1/matching/**").hasAnyRole("AGENT")
+                        .requestMatchers(
+                                "/api/v1/restitution/**").hasAnyRole("AGENT")
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

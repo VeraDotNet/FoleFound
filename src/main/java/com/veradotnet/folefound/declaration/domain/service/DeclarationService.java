@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -168,7 +169,7 @@ public class DeclarationService {
         return DeclarationMapper.INSTANCE.toResponseDTO(updated);
     }
 
-    @Transactional
+    /*@Transactional
     public void deleteDeclaration(Long id) throws ResourceNotFoundException {
         Declaration declaration = declarationRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Déclaration introuvable"));
@@ -179,5 +180,49 @@ public class DeclarationService {
         // Option B Soft Delete / Passer le statut à ARCHIVED
          declaration.setStatus(DeclarationStatus.ARCHIVED);
          declarationRepo.save(declaration);
+    }*/
+
+    @Transactional
+    public DeclarationResponseDTO archiveDeclaration(Long declarationId) throws ResourceNotFoundException {
+        // 1. Récupérer la déclaration
+        Declaration declaration = declarationRepo.findById(declarationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Declaration not found"));
+
+        // 2. Mettre à jour le statut de la déclaration
+        declaration.setStatus(DeclarationStatus.ARCHIVED);
+
+        // 3. Mettre à jour l'objet physique lié (s'il existe)
+        if (declaration.getItem() != null) {
+            declaration.getItem().setItemState(ItemState.ARCHIVED);
+        }
+
+        // 4. Sauvegarder et retourner le DTO
+        Declaration archivedDeclaration = declarationRepo.save(declaration);
+        return DeclarationMapper.INSTANCE.toResponseDTO(archivedDeclaration);
+    }
+
+    public Page<DeclarationResponseDTO> getDeclarationsWithGeneralFilters(
+            Long categoryId, Long campusId, Long locationId, String statusStr, DeclarationType type, LocalDateTime startDate, Pageable pageable) {
+
+        DeclarationStatus status = null;
+        if (statusStr != null && !statusStr.trim().isEmpty()) {
+            try {
+                status = DeclarationStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Statut invalide passé, on l'ignore pour ne pas bloquer la requête
+            }
+        }
+
+        Page<Declaration> declarationPage = declarationRepo.searchDeclarationsGeneral(
+                categoryId,
+                campusId,
+                locationId,
+                status,
+                type,
+                startDate,
+                pageable
+        );
+
+        return declarationPage.map(DeclarationMapper.INSTANCE::toResponseDTO);
     }
 }

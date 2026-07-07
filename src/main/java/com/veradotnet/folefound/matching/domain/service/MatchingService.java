@@ -4,12 +4,16 @@ import com.veradotnet.folefound.declaration.application.enums.DeclarationStatus;
 import com.veradotnet.folefound.declaration.application.enums.DeclarationType;
 import com.veradotnet.folefound.declaration.domain.model.Declaration;
 import com.veradotnet.folefound.declaration.domain.repository.DeclarationRepo;
+import com.veradotnet.folefound.matching.application.dto.MatchingDTO;
 import com.veradotnet.folefound.matching.application.enums.MatchingStatus;
+import com.veradotnet.folefound.matching.application.mapper.MatchingMapper;
 import com.veradotnet.folefound.matching.domain.model.Matching;
 import com.veradotnet.folefound.matching.domain.repository.MatchingRepo;
 import com.veradotnet.folefound.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,18 +82,25 @@ public class MatchingService {
     }
 
     @Transactional
-    public MatchingStatusDTO processAgentReview(Long matchingId, boolean isApproved) throws ResourceNotFoundException {
+    public MatchingDTO processAgentReview(Long matchingId, boolean isApproved) throws ResourceNotFoundException {
         Matching matching = matchingRepo.findById(matchingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Matching non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Matching not found"));
 
         if (matching.getStatus() != MatchingStatus.PENDING_AGENT_REVIEW) {
-            throw new IllegalStateException("Ce matching n'est pas en attente de revue par un agent.");
+            throw new IllegalStateException("This matching is not pending an agent review.");
         }
 
         if (isApproved) {
             // L'agent confirme que les objets correspondent !
             matching.setStatus(MatchingStatus.MANUAL_VALIDATED);
-            // Ici, tu déclenches l'envoi de l'e-mail automatique à l'étudiant pour lui dire de venir au guichet
+            String emailPerdeur = matching.getLostDeclaration().getUser().getEmail();
+            String objectName = matching.getLostDeclaration().getItem().getName();
+
+            emailService.sendSimpleEmail(
+                    emailPerdeur,
+                    "Objet trouvé - Une correspondance a été détectée !",
+                    "Bonjour,\n\nBonne nouvelle ! Un objet correspondant à votre déclaration (" + objectName + ") a été ramené au guichet du campus.\n\nConnectez-vous sur votre espace FoleFound pour confirmer s'il s'agit bien du vôtre."
+            );
         } else {
             // L'agent dit que ça ne correspond pas
             matching.setStatus(MatchingStatus.REJECTED);
@@ -100,6 +111,51 @@ public class MatchingService {
         return MatchingMapper.INSTANCE.toDTO(matching);
     }
 
+    public Page<MatchingDTO> getMatchings(MatchingStatus status, Pageable pageable) {
+        Page<Matching> matchingPage;
+
+        // Si un statut est passé dans l'URL, on filtre, sinon on prend tout
+        if (status != null) {
+            matchingPage = matchingRepo.findAllByStatus(status, pageable);
+        } else {
+            matchingPage = matchingRepo.findAll(pageable);
+        }
+
+        // 🎯 Conversion en DTO ET calcul du score dynamique à la volée
+        return matchingPage.map(matching -> {
+            // 1. Conversion de base (champs plats, sous-entités) via MapStruct
+            MatchingDTO dto = MatchingMapper.INSTANCE.toDTO(matching);
+
+            // 2. Calcul du score via ta logique ou ton service d'IA
+            double calculatedScore = this.calculateScore(
+                    matching.getLostDeclaration(),
+                    matching.getFoundDeclaration()
+            );
+
+            // 3. Injection du score calculé dans le DTO
+            dto.setMatchingScore(calculatedScore);
+
+            return dto;
+        });
+    }
+
+    public MatchingDTO getMatchingById(Long id) throws ResourceNotFoundException {
+        // 1. Récupération de l'entité en base
+        Matching matching = matchingRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Matching not found"));
+
+        // 2. Conversion en DTO de base via MapStruct
+        MatchingDTO dto = MatchingMapper.INSTANCE.toDTO(matching);
+
+        // 3. Calcul et injection du score à la volée avec ton algorithme
+        double calculatedScore = this.calculateScore(
+                matching.getLostDeclaration(),
+                matching.getFoundDeclaration()
+        );
+        dto.setMatchingScore(calculatedScore);
+
+        return dto;
+    }
 
     /**
      * Calcule le score de similarité classique (sur 100 points)
@@ -112,7 +168,7 @@ public class MatchingService {
 
         double score = 40.0; // Poids de base car même catégorie d'objet
 
-        // 🎨 Critère Couleur (30 points)
+        // Critère Couleur (30 points)
         if (d1.getItem().getColor().equalsIgnoreCase(d2.getItem().getColor())) {
             score += 30.0;
         } else if (d1.getItem().getColor().contains(d2.getItem().getColor()) ||
@@ -120,12 +176,12 @@ public class MatchingService {
             score += 15.0; // Couleur approchante (ex: "bleu" et "bleu marine")
         }
 
-        // 📍 Critère Lieu / Campus (20 points)
+        // Critère Lieu / Campus (20 points)
         if (d1.getLocation().getId().equals(d2.getLocation().getId())) {
             score += 20.0;
         }
 
-        // 📅 Critère Chronologique (10 points max si l'écart est faible)
+        // Critère Chronologique (10 points max si l'écart est faible)
         long daysBetween = Math.abs(ChronoUnit.DAYS.between(d1.getDateEvent(), d2.getDateEvent()));
         if (daysBetween <= 3) {
             score += 10.0;

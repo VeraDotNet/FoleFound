@@ -82,4 +82,9 @@ public class CategoryService {
         categoryRepo.delete(categoryToDelete);
         return true;
     }
+
+    public Page<CategoryDTO> searchCategoriesByName(String name, Pageable pageable) {
+        Page<Category> categories = categoryRepo.findByNameContainingIgnoreCase(name, pageable);
+        return categories.map(CategoryMapper.INSTANCE::toDTO);
+    }
 }

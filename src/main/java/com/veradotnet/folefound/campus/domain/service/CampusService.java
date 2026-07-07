@@ -83,4 +83,9 @@ public class CampusService {
         campusRepo.delete(campusToDelete);
         return true;
     }
+
+    public Page<CampusDTO> searchCampusesByName(String name, Pageable pageable) {
+        Page<Campus> campuses = campusRepo.findByNameContainingIgnoreCase(name, pageable);
+        return campuses.map(CampusMapper.INSTANCE::toDTO);
+    }
 }
